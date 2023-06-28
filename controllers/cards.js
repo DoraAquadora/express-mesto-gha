@@ -1,10 +1,14 @@
 const Card = require('../models/card');
 
+const DEFAULT_ERROR_CODE = 500;
+const NOT_FOUND_ERROR_CODE = 404;
+const INVALID_PARAMS_ERROR_CODE = 400;
+
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
+    .then((cards) => res.send(cards)) // .status(200)
     .catch(() => res
-      .status(500)
+      .status(DEFAULT_ERROR_CODE)
       .send({ message: 'Произошла ошибка при запросе всех карточек' }));
 };
 
@@ -13,14 +17,14 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.send(card)) // .status(201)
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({
+        res.status(INVALID_PARAMS_ERROR_CODE).send({
           message: 'Переданы некорректные данные при создании карточки.',
         });
       } else {
-        res.status(500).send({ message: 'Ошибка по умолчанию' });
+        res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -30,18 +34,18 @@ const deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(404)
+          .status(NOT_FOUND_ERROR_CODE)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
       return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({
+        res.status(INVALID_PARAMS_ERROR_CODE).send({
           message: 'Переданы некорректные данные карточки.',
         });
       } else {
-        res.status(500).send({ message: 'Ошибка по умолчанию' });
+        res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -55,20 +59,20 @@ const likeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(404)
+          .status(NOT_FOUND_ERROR_CODE)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(200).send(card);
+      return res.send(card); // .status(200)
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(400)
+          .status(INVALID_PARAMS_ERROR_CODE)
           .send({
             message: 'Переданы некорректные данные для постановки лайка.',
           });
       }
-      return res.status(500).send({ message: 'Ошибка по умолчанию' });
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -81,26 +85,26 @@ const deleteLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(404)
+          .status(NOT_FOUND_ERROR_CODE)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(200).send(card);
+      return res.send(card); // .status(200)
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(400)
+          .status(INVALID_PARAMS_ERROR_CODE)
           .send({
             message: 'Переданы некорректные данные для удаления лайка.',
           });
       }
-      return res.status(500).send({ message: 'Ошибка по умолчанию' });
+      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
     });
 };
-module.exports ={
+module.exports = {
   createCard,
   getCards,
   deleteCard,
   likeCard,
   deleteLikeCard,
-}
+};

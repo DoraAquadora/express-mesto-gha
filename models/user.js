@@ -1,7 +1,5 @@
-// models/user.js
-
 const mongoose = require('mongoose');
-// Опишем схему:
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
