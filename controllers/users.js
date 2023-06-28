@@ -38,7 +38,7 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(statusErr.BadRequest).send({
-          message: 'неверные данные при ',
+          message: 'неверные данные ',
         });
       } else {
         res.status(statusErr.InternalError).send({ message: 'ошибка' });
