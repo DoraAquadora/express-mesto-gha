@@ -1,12 +1,11 @@
 const Card = require('../models/card');
-const HttpStatus = require('../helpers/status');
-
+const statusErr = require('../helpers/status');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(HttpStatus.Success).send(cards))
+    .then((cards) => res.status(statusErr.Success).send(cards))
     .catch(() => res
-      .status(HttpStatus.InternalError)
+      .status(statusErr.InternalError)
       .send({ message: 'Произошла ошибка при запросе всех карточек' }));
 };
 
@@ -15,14 +14,14 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(HttpStatus.Success).send(card))
+    .then((card) => res.status(statusErr.Success).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(HttpStatus.BadRequest).send({
+        res.status(statusErr.BadRequest).send({
           message: 'Переданы некорректные данные при создании карточки.',
         });
       } else {
-        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -32,18 +31,18 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
+          .status(statusErr.NotFound)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(HttpStatus.BadRequest).send({
+        res.status(statusErr.BadRequest).send({
           message: 'Переданы некорректные данные карточки.',
         });
       } else {
-        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -57,20 +56,20 @@ module.exports.likeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
+          .status(statusErr.NotFound)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(HttpStatus.BadRequest)
+          .status(statusErr.BadRequest)
           .send({
             message: 'Переданы некорректные данные для постановки лайка.',
           });
       }
-      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -83,19 +82,19 @@ module.exports.deleteLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
+          .status(statusErr.NotFound)
           .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(HttpStatus.BadRequest)
+          .status(statusErr.BadRequest)
           .send({
             message: 'Переданы некорректные данные для удаления лайка.',
           });
       }
-      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };
