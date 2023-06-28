@@ -1,53 +1,53 @@
-const HttpStatus = require('../helpers/status');
 const Card = require('../models/card');
+const statusErr = require('../codes/Errors');
 
-const getCards = (req, res) => {
+module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(HttpStatus.Success).send(cards))
+    .then((cards) => res.status(statusErr.Success).send(cards))
     .catch(() => res
-      .status(HttpStatus.InternalError)
-      .send({ message: 'Произошла ошибка при запросе всех карточек' }));
+      .status(statusErr.InternalError)
+      .send({ message: 'ошибка запроса' }));
 };
 
-const createCard = (req, res) => {
+module.exports.createCard = (req, res) => {
   console.log(req.user._id);
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(HttpStatus.Success).send(card))
+    .then((card) => res.status(statusErr.Success).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(HttpStatus.BadRequest).send({
-          message: 'Переданы некорректные данные при создании карточки.',
+        res.status(statusErr.BadRequest).send({
+          message: 'неверные данные ',
         });
       } else {
-        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'ошибка' });
       }
     });
 };
 
-const deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
-          .send({ message: 'Карточка c указанным id не найдена' });
+          .status(statusErr.NotFound)
+          .send({ message: 'не найден id' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(HttpStatus.BadRequest).send({
-          message: 'Переданы некорректные данные карточки.',
+        res.status(statusErr.BadRequest).send({
+          message: 'неверные данные .',
         });
       } else {
-        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'ошибка' });
       }
     });
 };
 
-const likeCard = (req, res) => {
+module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -56,24 +56,24 @@ const likeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
-          .send({ message: 'Карточка c указанным id не найдена' });
+          .status(statusErr.NotFound)
+          .send({ message: 'не найден id' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(HttpStatus.BadRequest)
+          .status(statusErr.BadRequest)
           .send({
-            message: 'Переданы некорректные данные для постановки лайка.',
+            message: 'неверные данные ',
           });
       }
-      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
 };
 
-const deleteLikeCard = (req, res) => {
+module.exports.deleteLikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -82,26 +82,19 @@ const deleteLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(HttpStatus.NotFound)
-          .send({ message: 'Карточка c указанным id не найдена' });
+          .status(statusErr.NotFound)
+          .send({ message: 'не найден id' });
       }
-      return res.status(HttpStatus.Success).send(card);
+      return res.status(statusErr.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(HttpStatus.BadRequest)
+          .status(statusErr.BadRequest)
           .send({
-            message: 'Переданы некорректные данные для удаления лайка.',
+            message: 'неверные данные ',
           });
       }
-      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
-};
-module.exports = {
-  getCards,
-  createCard,
-  deleteCard,
-  likeCard,
-  deleteLikeCard,
 };

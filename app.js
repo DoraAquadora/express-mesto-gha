@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const routuser = require('./routes/users');
-const routCard = require('./routes/cards');
+const router = require('./routes/router');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(express.json());
+app.use(router);
 
 app.use((req, res, next) => {
   req.user = {
@@ -15,13 +15,6 @@ app.use((req, res, next) => {
   };
 
   next();
-});
-
-app.use(routuser);
-app.use(routCard);
-app.use('/*', (req, res) => {
-  res.status(404)
-    .send({ message: '404: Страница не найдена.' });
 });
 
 mongoose
@@ -32,10 +25,6 @@ mongoose
   .catch(() => {
     console.log('Не удалось подключиться к БД');
   });
-
-app.get('/', (req, res) => {
-  res.send('Вывод инф-ции на страницу...');
-});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
