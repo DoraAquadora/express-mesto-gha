@@ -1,7 +1,7 @@
 const HttpStatus = require('../helpers/status');
 const Card = require('../models/card');
 
-module.exports.getCards = (req, res) => {
+const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(HttpStatus.Success).send(cards))
     .catch(() => res
@@ -9,7 +9,7 @@ module.exports.getCards = (req, res) => {
       .send({ message: 'Произошла ошибка при запросе всех карточек' }));
 };
 
-module.exports.createCard = (req, res) => {
+const createCard = (req, res) => {
   console.log(req.user._id);
   const { name, link } = req.body;
   const owner = req.user._id;
@@ -26,7 +26,7 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
@@ -47,7 +47,7 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 
-module.exports.likeCard = (req, res) => {
+const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -73,7 +73,7 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-module.exports.deleteLikeCard = (req, res) => {
+const deleteLikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -97,4 +97,11 @@ module.exports.deleteLikeCard = (req, res) => {
       }
       return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
+};
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  deleteLikeCard,
 };

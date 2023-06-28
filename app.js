@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const routes = require('./routes/router');
+const routuser = require('./routes/users');
+const routCard = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -16,7 +17,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(routes);
+app.use(routuser);
+app.use(routCard);
+app.use('/*', (req, res) => {
+  res.status(404)
+    .send({ message: '404: Страница не найдена.' });
+});
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/mestodb')
