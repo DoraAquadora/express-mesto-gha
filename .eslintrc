@@ -10,8 +10,6 @@
   },
   "rules": {
     "no-underscore-dangle": ["error", { "allow": ["_id"] }],
-    "no-console": "off",
-    "linebreak-style":"off"
-
+    "no-console": "off"
   }
 }
