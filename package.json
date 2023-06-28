@@ -4,24 +4,27 @@
   "description": "[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)\r # Проект Mesto фронтенд + бэкенд",
   "main": "app.js",
   "scripts": {
-    "lint": "npx eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoraAquadora/express-mesto-gha.git"
+  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DoraAquadora/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/DoraAquadora/express-mesto-gha#readme",
   "dependencies": {
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.27.5",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
-    "mongoose": "^7.3.1",
-    "nodemon": "^2.0.22"
+    "mongoose": "^7.3.1"
   },
   "devDependencies": {
-    "eslint": "^8.39.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.27.5",
     "nodemon": "^2.0.22"
   }
 }
