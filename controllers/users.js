@@ -14,8 +14,7 @@ const getUsers = (req, res) => {
 const getUserId = (req, res) => {
   User
     .findById(req.params.userId)
-    .then((user) => res.send(user)) // .status(200)
-    .orFail()
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
@@ -40,7 +39,7 @@ const getUserId = (req, res) => {
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.send(user)) // .status(201)
+    .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(INVALID_PARAMS_ERROR_CODE).send({
@@ -59,7 +58,7 @@ const updateUserProfile = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
-    .then((user) => res.send(user)) // .status(200)
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res
@@ -84,7 +83,7 @@ const updateUserProfile = (req, res) => {
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-    .then((user) => res.send(user)) // .status(200)
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res
