@@ -10,7 +10,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '649b504d310500c26cb69743', // ID пользователя из mongo.
+    _id: '649b504d310500c26cb69743',
   };
 
   next();
@@ -18,7 +18,6 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
-// Данный адрес взят после подключения через терминал с помощью mongosh:
 mongoose
   .connect('mongodb://127.0.0.1:27017/mestodb')
   .then(() => {

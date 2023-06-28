@@ -1,7 +1,6 @@
 const HttpStatus = require('../helpers/status');
 const Card = require('../models/card');
 
-// Находим все карточки:
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(HttpStatus.Success).send(cards))
@@ -10,7 +9,6 @@ module.exports.getCards = (req, res) => {
       .send({ message: 'Произошла ошибка при запросе всех карточек' }));
 };
 
-// Создаем карточку:
 module.exports.createCard = (req, res) => {
   console.log(req.user._id);
   const { name, link } = req.body;
@@ -28,7 +26,6 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-// Удаляем карточку:
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
@@ -50,7 +47,6 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 
-// Ставим лайк на карточку:
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -77,7 +73,6 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-// Убираем лайк с карточки:
 module.exports.deleteLikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,

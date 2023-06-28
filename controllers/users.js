@@ -1,14 +1,12 @@
 const HttpStatus = require('../helpers/status');
 const User = require('../models/user');
 
-// Находим всех пользователей:
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(HttpStatus.Success).send(users))
     .catch(() => res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' }));
 };
 
-// Находим пользователя по ID:
 module.exports.getUserId = (req, res) => {
   User
     .findById(req.params.userId)
@@ -33,7 +31,6 @@ module.exports.getUserId = (req, res) => {
     });
 };
 
-// Создаем пользователя:
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
@@ -49,7 +46,6 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-// Обновление данных пользователя:
 module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
@@ -70,7 +66,6 @@ module.exports.updateUserProfile = (req, res) => {
     });
 };
 
-// Обновление аватара пользователя:
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
