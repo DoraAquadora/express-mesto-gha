@@ -1,10 +1,10 @@
 const User = require('../models/user');
-const statusErr = require('../helpers/status');
+const statusErr = require('../codes/status');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(statusErr.Success).send(users))
-    .catch(() => res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' }));
+    .catch(() => res.status(statusErr.InternalError).send({ message: 'ошибка' }));
 };
 
 module.exports.getUserId = (req, res) => {
@@ -14,7 +14,7 @@ module.exports.getUserId = (req, res) => {
       if (!user) {
         return res
           .status(statusErr.NotFound)
-          .send({ message: 'Пользователь c указанным _id не найден' });
+          .send({ message: 'id не определен' });
       }
       return res.status(statusErr.Success).send(user);
     })
@@ -23,10 +23,10 @@ module.exports.getUserId = (req, res) => {
         res
           .status(statusErr.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при поиске пользователя',
+            message: 'неверные данные ',
           });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'ошибка' });
       }
     });
 };
@@ -38,10 +38,10 @@ module.exports.createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(statusErr.BadRequest).send({
-          message: 'Переданы некорректные данные при создании пользователя.',
+          message: 'неверные данные при ',
         });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
+        res.status(statusErr.InternalError).send({ message: 'ошибка' });
       }
     });
 };
@@ -59,10 +59,10 @@ module.exports.updateUserProfile = (req, res) => {
         return res
           .status(statusErr.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при обновлении профиля',
+            message: 'неверные данные ',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
 };
 
@@ -75,9 +75,9 @@ module.exports.updateUserAvatar = (req, res) => {
         return res
           .status(statusErr.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при обновлении аватара',
+            message: 'неверные данные ',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'Ошибка по умолчанию' });
+      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
 };
