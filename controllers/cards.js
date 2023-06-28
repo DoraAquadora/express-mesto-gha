@@ -1,12 +1,13 @@
 const Card = require('../models/card');
-const statusErr = require('../codes/Errors');
+const HttpStatus = require('../helpers/status');
+
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(statusErr.Success).send(cards))
+    .then((cards) => res.status(HttpStatus.Success).send(cards))
     .catch(() => res
-      .status(statusErr.InternalError)
-      .send({ message: 'ошибка запроса' }));
+      .status(HttpStatus.InternalError)
+      .send({ message: 'Произошла ошибка при запросе всех карточек' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -14,14 +15,14 @@ module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(statusErr.Success).send(card))
+    .then((card) => res.status(HttpStatus.Success).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(statusErr.BadRequest).send({
-          message: 'неверные данные ',
+        res.status(HttpStatus.BadRequest).send({
+          message: 'Переданы некорректные данные при создании карточки.',
         });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -31,18 +32,18 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(statusErr.NotFound)
-          .send({ message: 'не найден id' });
+          .status(HttpStatus.NotFound)
+          .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(statusErr.Success).send(card);
+      return res.status(HttpStatus.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(statusErr.BadRequest).send({
-          message: 'неверные данные .',
+        res.status(HttpStatus.BadRequest).send({
+          message: 'Переданы некорректные данные карточки.',
         });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -56,20 +57,20 @@ module.exports.likeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(statusErr.NotFound)
-          .send({ message: 'не найден id' });
+          .status(HttpStatus.NotFound)
+          .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(statusErr.Success).send(card);
+      return res.status(HttpStatus.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(statusErr.BadRequest)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'неверные данные ',
+            message: 'Переданы некорректные данные для постановки лайка.',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -82,19 +83,19 @@ module.exports.deleteLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(statusErr.NotFound)
-          .send({ message: 'не найден id' });
+          .status(HttpStatus.NotFound)
+          .send({ message: 'Карточка c указанным id не найдена' });
       }
-      return res.status(statusErr.Success).send(card);
+      return res.status(HttpStatus.Success).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(statusErr.BadRequest)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'неверные данные ',
+            message: 'Переданы некорректные данные для удаления лайка.',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };

@@ -1,10 +1,10 @@
 const User = require('../models/user');
-const statusErr = require('../codes/Errors');
+const HttpStatus = require('../helpers/status');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(statusErr.Success).send(users))
-    .catch(() => res.status(statusErr.InternalError).send({ message: 'ошибка' }));
+    .then((users) => res.status(HttpStatus.Success).send(users))
+    .catch(() => res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' }));
 };
 
 module.exports.getUserId = (req, res) => {
@@ -13,20 +13,20 @@ module.exports.getUserId = (req, res) => {
     .then((user) => {
       if (!user) {
         return res
-          .status(statusErr.NotFound)
-          .send({ message: 'не найден id' });
+          .status(HttpStatus.NotFound)
+          .send({ message: 'Пользователь c указанным _id не найден' });
       }
-      return res.status(statusErr.Success).send(user);
+      return res.status(HttpStatus.Success).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
-          .status(statusErr.BadRequest)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'не верные данные ',
+            message: 'Переданы некорректные данные при поиске пользователя',
           });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -34,14 +34,14 @@ module.exports.getUserId = (req, res) => {
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(statusErr.Success).send(user))
+    .then((user) => res.status(HttpStatus.Success).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(statusErr.BadRequest).send({
-          message: 'не верные данные ',
+        res.status(HttpStatus.BadRequest).send({
+          message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
       }
     });
 };
@@ -57,27 +57,27 @@ module.exports.updateUserProfile = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
-          .status(statusErr.BadRequest)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'не верные данные ',
+            message: 'Переданы некорректные данные при обновлении профиля',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.status(statusErr.Success).send(user))
+    .then((user) => res.status(HttpStatus.Success).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
-          .status(statusErr.BadRequest)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'не верные данные ',
+            message: 'Переданы некорректные данные при обновлении аватара',
           });
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка по умолчанию' });
     });
 };
