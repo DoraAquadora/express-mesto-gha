@@ -1,52 +1,47 @@
+const HttpStatus = require('../helpers/status');
 const User = require('../models/user');
 
-const DEFAULT_ERROR_CODE = 500;
-const NOT_FOUND_ERROR_CODE = 404;
-const INVALID_PARAMS_ERROR_CODE = 400;
-
 const getUsers = (req, res) => {
-  User
-    .find({})
-    .then((users) => res.send(users))
-    .catch(() => res.status(DEFAULT_ERROR_CODE).send({ message: 'Произошла ошибка' }));
+  User.find({})
+    .then((users) => res.status(HttpStatus.Success).send(users))
+    .catch(() => res.status(HttpStatus.InternalError).send({ message: 'Ошибка' }));
 };
 
 const getUserId = (req, res) => {
   User
     .findById(req.params.userId)
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(HttpStatus.NotFound)
+          .send({ message: 'id не найден' });
+      }
+      return res.status(HttpStatus.Success).send(user);
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(INVALID_PARAMS_ERROR_CODE)
+        res
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при поиске пользователя',
+            message: 'Неверные данные ',
           });
+      } else {
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка' });
       }
-
-      if (err.name === 'DocumentNotFoundError') {
-        return res
-          .status(NOT_FOUND_ERROR_CODE)
-          .send({
-            message: 'Пользователь c указанным _id не найден',
-          });
-      }
-
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(HttpStatus.Success).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(INVALID_PARAMS_ERROR_CODE).send({
-          message: 'Переданы некорректные данные при создании пользователя.',
+        res.status(HttpStatus.BadRequest).send({
+          message: 'Неверные данные ',
         });
       } else {
-        res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
+        res.status(HttpStatus.InternalError).send({ message: 'Ошибка' });
       }
     });
 };
@@ -60,54 +55,36 @@ const updateUserProfile = (req, res) => {
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res
-          .status(INVALID_PARAMS_ERROR_CODE)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при обновлении профиля',
+            message: 'Неверные данные ',
           });
       }
-
-      if (err.name === 'DocumentNotFoundError') {
-        return res
-          .status(NOT_FOUND_ERROR_CODE)
-          .send({
-            message: 'Пользователь не найден',
-          });
-      }
-
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка' });
     });
 };
 
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
-    .then((user) => res.status(200).send(user))
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+    .then((user) => res.status(HttpStatus.Success).send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res
-          .status(INVALID_PARAMS_ERROR_CODE)
+          .status(HttpStatus.BadRequest)
           .send({
-            message: 'Переданы некорректные данные при обновлении аватара',
+            message: 'Неверные данные ',
           });
       }
-
-      if (err.name === 'DocumentNotFoundError') {
-        return res
-          .status(NOT_FOUND_ERROR_CODE)
-          .send({
-            message: 'Пользователь не найден',
-          });
-      }
-
-      return res.status(DEFAULT_ERROR_CODE).send({ message: 'Ошибка по умолчанию' });
+      return res.status(HttpStatus.InternalError).send({ message: 'Ошибка' });
     });
 };
 module.exports = {
-  createUser,
   getUsers,
   getUserId,
+  createUser,
   updateUserProfile,
   updateUserAvatar,
 };
