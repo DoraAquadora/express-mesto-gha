@@ -10,11 +10,8 @@ const {
   updateUserAvatar,
 } = require('../controllers/users');
 
-// Находит всех пользователей:
 router.get('/', getUsers);
-// Находим пользователя:
 router.get('/me', getCurrentUserInfo);
-// Находит пользователя по _id:
 router.get(
   '/:id',
   celebrate({
@@ -24,7 +21,6 @@ router.get(
   }),
   getUserId,
 );
-// Обновление профиля:
 router.patch(
   '/me',
   celebrate({
@@ -35,7 +31,6 @@ router.patch(
   }),
   updateUserProfile,
 );
-// Обновление аватара:
 router.patch(
   '/me/avatar',
   celebrate({

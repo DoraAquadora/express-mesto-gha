@@ -4,11 +4,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { AUTH_KEY } = require('../utils/constants');
-const UnauthorizedError = require('../helpers/errors/UnauthorizedError');
-const ConflictError = require('../helpers/errors/ConflictError');
-const BadRequestError = require('../helpers/errors/BadRequestError');
+const UnauthorizedError = require('../codes/errors/UnauthorizedError');
+const ConflictError = require('../codes/errors/ConflictError');
+const BadRequestError = require('../codes/errors/BadRequestError');
 
-// регистрация пользователя
 module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
@@ -38,13 +37,13 @@ module.exports.createUser = (req, res, next) => {
       if (err.code === 11000) {
         next(
           new ConflictError(
-            'Пользователь с таким электронным адресом уже зарегистрирован',
+            'Данный пользователь существует',
           ),
         );
       } else if (err.name === 'ValidationError') {
         next(
           new BadRequestError(
-            'Переданы некорректные данные при регистрации пользователя',
+            'Неверные данные',
           ),
         );
       } else {
@@ -53,7 +52,6 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-// логин пользователя
 module.exports.loginUser = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -68,7 +66,7 @@ module.exports.loginUser = (req, res, next) => {
         return res.send({ _id: token });
       }
 
-      throw new UnauthorizedError('Неправильные почта или пароль');
+      throw new UnauthorizedError('Неверные почта или пароль');
     })
     .catch(next);
 };

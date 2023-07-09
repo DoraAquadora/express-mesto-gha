@@ -11,20 +11,18 @@ const auth = require('./middlewares/auth');
 const routeUsers = require('./routes/users');
 const routeCards = require('./routes/cards');
 
-const NotFoundError = require('./helpers/errors/NotFoundError');
+const NotFoundError = require('./codes/errors/NotFoundError');
 const errorHandler = require('./middlewares/errorHandler');
 
 const { PORT = 3000, URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
-// mongoose.set('strictQuery', true);
-
 mongoose
   .connect(URL)
   .then(() => {
-    console.log('БД подключена');
+    console.log('Запуск');
   })
   .catch(() => {
-    console.log('Не удалось подключиться к БД');
+    console.log('Запуска не будет');
   });
 
 const app = express();
@@ -40,7 +38,7 @@ app.use(auth);
 app.use('/users', routeUsers);
 app.use('/cards', routeCards);
 
-app.use((req, res, next) => next(new NotFoundError('Страницы по запрошенному URL не существует')));
+app.use((req, res, next) => next(new NotFoundError('Не найдено')));
 app.use(errors());
 app.use(errorHandler);
 

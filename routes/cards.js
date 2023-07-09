@@ -11,9 +11,7 @@ const {
   deleteLikeCard,
 } = require('../controllers/cards');
 
-// Находим все карточки:
 router.get('/', getCards);
-// Создаем карточку:
 router.post(
   '/',
   celebrate({
@@ -24,7 +22,6 @@ router.post(
   }),
   createCard,
 );
-// Удаляем карточку:
 router.delete(
   '/:id',
   celebrate({
@@ -34,7 +31,6 @@ router.delete(
   }),
   deleteCard,
 );
-// Ставим лайк на карточку:
 router.put(
   '/:cardId/likes',
   celebrate({
@@ -44,7 +40,6 @@ router.put(
   }),
   likeCard,
 );
-// Убираем лайк с карточки:
 router.delete(
   '/:cardId/likes',
   celebrate({

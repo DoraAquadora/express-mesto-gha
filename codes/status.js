@@ -1,4 +1,4 @@
-const HttpStatus = {
+const statusErr = {
   Success: 200,
   Created: 201,
   BadRequest: 400,
@@ -9,4 +9,4 @@ const HttpStatus = {
   InternalError: 500,
 };
 
-module.exports = HttpStatus;
+module.exports = statusErr;

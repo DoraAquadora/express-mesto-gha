@@ -9,7 +9,7 @@ const cardSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: ({ length }) => length >= 2 && length <= 30,
-        message: 'Имя карточки должно быть длиной от 2 до 30 символов',
+        message: 'нужно от 2 до 30 символов',
       },
     },
     link: {
@@ -17,7 +17,7 @@ const cardSchema = new mongoose.Schema(
       required: true,
       validate: {
         validator: (url) => URL_REGEX.test(url),
-        message: 'Требуется ввести URL',
+        message: 'Нужен  URL',
       },
     },
     owner: {

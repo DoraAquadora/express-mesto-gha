@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       validate: {
         validator: (email) => /.+@.+\..+/.test(email),
-        message: 'Требуется ввести электронный адрес',
+        message: 'Нужен электронный адрес',
       },
     },
 
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
       default: 'Жак-Ив Кусто',
       validate: {
         validator: ({ length }) => length >= 2 && length <= 30,
-        message: 'Имя пользователя должно быть длиной от 2 до 30 символов',
+        message: 'Нужно от 2 до 30 символов',
       },
     },
     about: {
@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
       validate: {
         validator: ({ length }) => length >= 2 && length <= 30,
         message:
-          'Информация о пользователе должна быть длиной от 2 до 30 символов',
+          'Нужно от 2 до 30 символов',
       },
     },
     avatar: {
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
         'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
       validate: {
         validator: (url) => URL_REGEX.test(url),
-        message: 'Требуется ввести URL',
+        message: 'Нужен URL',
       },
     },
   },

@@ -1,13 +1,12 @@
 const { ValidationError } = require('mongoose').Error;
 const { CastError } = require('mongoose').Error;
 const Card = require('../models/card');
-const HttpStatus = require('../helpers/status');
+const statusErr = require('../codes/status');
 
-const ForbiddenError = require('../helpers/errors/ForbiddenError');
-const NotFoundError = require('../helpers/errors/NotFoundError');
-const BadRequestError = require('../helpers/errors/BadRequestError');
+const ForbiddenError = require('../codes/errors/ForbiddenError');
+const NotFoundError = require('../codes/errors/NotFoundError');
+const BadRequestError = require('../codes/errors/BadRequestError');
 
-// Находим все карточки:
 module.exports.getCards = (req, res, next) => {
   Card
     .find({})
@@ -16,19 +15,18 @@ module.exports.getCards = (req, res, next) => {
     .catch(next);
 };
 
-// Создаем карточку:
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const { userId } = req.user;
 
   Card
     .create({ name, link, owner: userId })
-    .then((card) => res.status(HttpStatus.Created).send({ data: card }))
+    .then((card) => res.status(statusErr.Created).send({ data: card }))
     .catch((err) => {
       if (err instanceof ValidationError) {
         next(
           new BadRequestError(
-            'Переданы некорректные данные при создании карточки',
+            'неверные данные',
           ),
         );
       } else {
@@ -37,7 +35,6 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
-// Удаляем карточку:
 module.exports.deleteCard = (req, res, next) => {
   const { id: cardId } = req.params;
   const { userId } = req.user;
@@ -48,20 +45,20 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Данные по указанному id не найдены');
+        throw new NotFoundError('не найдено');
       }
 
       const { owner: cardOwnerId } = card;
 
       if (cardOwnerId.valueOf() !== userId) {
-        throw new ForbiddenError('Нет прав доступа');
+        throw new ForbiddenError('без доступа');
       }
 
       return Card.findByIdAndDelete(cardId);
     })
     .then((deletedCard) => {
       if (!deletedCard) {
-        throw new NotFoundError('Карточка уже была удалена');
+        throw new NotFoundError('не найдено');
       }
 
       res.send({ data: deletedCard });
@@ -69,7 +66,6 @@ module.exports.deleteCard = (req, res, next) => {
     .catch(next);
 };
 
-// Ставим лайк на карточку:
 module.exports.likeCard = (req, res, next) => {
   const { cardId } = req.params;
   const { userId } = req.user;
@@ -89,13 +85,13 @@ module.exports.likeCard = (req, res, next) => {
     .then((card) => {
       if (card) return res.send({ data: card });
 
-      throw new NotFoundError('Карточка с указанным id не найдена');
+      throw new NotFoundError('Не найдено');
     })
     .catch((err) => {
       if (err instanceof CastError) {
         next(
           new BadRequestError(
-            'Переданы некорректные данные при добавлении лайка карточке',
+            'Неверные данные',
           ),
         );
       } else {
@@ -104,7 +100,6 @@ module.exports.likeCard = (req, res, next) => {
     });
 };
 
-// Убираем лайк с карточки:
 module.exports.deleteLikeCard = (req, res, next) => {
   const { cardId } = req.params;
   const { userId } = req.user;
@@ -124,13 +119,13 @@ module.exports.deleteLikeCard = (req, res, next) => {
     .then((card) => {
       if (card) return res.send({ data: card });
 
-      throw new NotFoundError('Данные по указанному id не найдены');
+      throw new NotFoundError('не найдено');
     })
     .catch((err) => {
       if (err instanceof CastError) {
         next(
           new BadRequestError(
-            'Переданы некорректные данные при снятии лайка карточки',
+            'Неверные данные',
           ),
         );
       } else {
