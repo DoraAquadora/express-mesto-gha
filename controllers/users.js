@@ -1,83 +1,119 @@
 const User = require('../models/user');
-const statusErr = require('../codes/status');
+const NotFoundError = require('../helpers/errors/NotFoundError');
+const BadRequestError = require('../helpers/errors/BadRequestError');
 
-module.exports.getUsers = (req, res) => {
+// Находим всех пользователей:
+module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(statusErr.Success).send(users))
-    .catch(() => res.status(statusErr.InternalError).send({ message: 'ошибка' }));
+    .then((users) => res.send({ users }))
+    .catch(next);
 };
 
-module.exports.getUserId = (req, res) => {
+// Находим конкретного пользователя по ID:
+module.exports.getUserId = (req, res, next) => {
+  const { id } = req.params;
+
   User
-    .findById(req.params.userId)
+    .findById(id)
     .then((user) => {
-      if (!user) {
-        return res
-          .status(statusErr.NotFound)
-          .send({ message: 'id не определен' });
-      }
-      return res.status(statusErr.Success).send(user);
+      if (user) return res.send({ user });
+
+      throw new NotFoundError('Пользователь c указанным _id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(statusErr.BadRequest)
-          .send({
-            message: 'неверные данные ',
-          });
+        next(new BadRequestError('Переданы некорректные данные при поиске пользователя'));
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.status(statusErr.Success).send(user))
+// Поиск пользователя:
+module.exports.getCurrentUserInfo = (req, res, next) => {
+  const { userId } = req.user;
+
+  User
+    .findById(userId)
+    .then((user) => {
+      if (user) return res.send({ user });
+
+      throw new NotFoundError('Пользователь c указанным _id не найден');
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(statusErr.BadRequest).send({
-          message: 'неверные данные ',
-        });
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные при поиске пользователя'));
       } else {
-        res.status(statusErr.InternalError).send({ message: 'ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.updateUserProfile = (req, res) => {
+// Обновление данных пользователя:
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(
-    req.user._id,
-    { name, about },
-    { new: true, runValidators: true },
-  )
-    .then((user) => res.status(200).send(user))
+  const { userId } = req.user;
+
+  User
+    .findByIdAndUpdate(
+      userId,
+      {
+        name,
+        about,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+    .then((user) => {
+      if (user) return res.send({ user });
+
+      throw new NotFoundError('Пользователь c указанным _id не найден');
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(statusErr.BadRequest)
-          .send({
-            message: 'неверные данные ',
-          });
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении профиля',
+          ),
+        );
+      } else {
+        next(err);
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+// Обновление аватара пользователя:
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.status(statusErr.Success).send(user))
+  const { userId } = req.user;
+
+  User
+    .findByIdAndUpdate(
+      userId,
+      {
+        avatar,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+    .then((user) => {
+      if (user) return res.send({ user });
+
+      throw new NotFoundError('Пользователь c указанным _id не найден');
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(statusErr.BadRequest)
-          .send({
-            message: 'неверные данные ',
-          });
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении профиля пользователя',
+          ),
+        );
+      } else {
+        next(err);
       }
-      return res.status(statusErr.InternalError).send({ message: 'ошибка' });
     });
 };

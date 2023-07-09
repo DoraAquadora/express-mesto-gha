@@ -1,36 +1,47 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 
-const routes = require('./routes/router');
+const routeSignup = require('./routes/signup');
+const routeSignin = require('./routes/signin');
 
-const { PORT = 3000 } = process.env;
-const app = express();
+const auth = require('./middlewares/auth');
 
-app.use(express.json());
+const routeUsers = require('./routes/users');
+const routeCards = require('./routes/cards');
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '649c44d50a1776de0b35e538',
-  };
+const NotFoundError = require('./helpers/errors/NotFoundError');
+const errorHandler = require('./middlewares/errorHandler');
 
-  next();
-});
+const { PORT = 3000, URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
-app.use(routes);
+// mongoose.set('strictQuery', true);
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/mestodb')
+  .connect(URL)
   .then(() => {
-    console.log('Запуск');
+    console.log('БД подключена');
   })
   .catch(() => {
-    console.log('Запуска не будет');
+    console.log('Не удалось подключиться к БД');
   });
 
-app.get('/', (req, res) => {
-  res.send('Вывод инф-ции на страницу...');
-});
+const app = express();
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/', routeSignup);
+app.use('/', routeSignin);
+
+app.use(auth);
+
+app.use('/users', routeUsers);
+app.use('/cards', routeCards);
+
+app.use((req, res, next) => next(new NotFoundError('Страницы по запрошенному URL не существует')));
+app.use(errors());
+app.use(errorHandler);
+
+app.listen(PORT);

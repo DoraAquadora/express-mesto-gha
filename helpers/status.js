@@ -1,5 +1,6 @@
-const statusErr = {
+const HttpStatus = {
   Success: 200,
+  Created: 201,
   BadRequest: 400,
   Unauthorized: 401,
   Forbidden: 403,
@@ -8,4 +9,4 @@ const statusErr = {
   InternalError: 500,
 };
 
-module.exports = statusErr;
+module.exports = HttpStatus;
