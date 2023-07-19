@@ -1,27 +1,27 @@
+require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const myError = require('../errors/errors');
 
-const { AUTH_KEY } = require('../utils/constants');
-const UnauthorizedError = require('../codes/errors/UnauthorizedError');
+const extractBearerToken = (header) => header.replace('Bearer ', '');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-  const bearer = 'Bearer ';
-  const errorMsg = 'Неправильные почта или пароль';
-
-  if (!authorization || !authorization.startsWith(bearer)) {
-    return next(new UnauthorizedError(`${errorMsg}(${authorization})!`));
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return next(new myError.AuthError(myError.AuthMsg));
   }
 
-  const token = authorization.replace(bearer, '');
+  const token = extractBearerToken(authorization);
   let payload;
 
   try {
-    payload = jwt.verify(token, AUTH_KEY);
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
   } catch (err) {
-    return next(new UnauthorizedError(`${errorMsg}!`));
+    next(new myError.AuthError(myError.AuthMsg));
   }
 
-  req.user = payload;
+  req.user = payload; // записываем пейлоуд в объект запроса
 
-  return next();
+  return next(); // пропускаем запрос дальше
 };

@@ -1,45 +1,59 @@
+/* сервер если запустился, то слушает порты (ручки). На бэке приложение запускает нода */
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { errors } = require('celebrate');
+const helmet = require('helmet');
+const router = require('express').Router();
+const { celebrate, errors } = require('celebrate');
 
-const routeSignup = require('./routes/signup');
-const routeSignin = require('./routes/signin');
-
+const {
+  validateLogin,
+  validateUser,
+} = require('./utils/validators');
 const auth = require('./middlewares/auth');
+const defaultError = require('./middlewares/defaultError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
+const { login, createUser } = require('./controllers/auth');
+const myError = require('./errors/errors');
 
-const routeUsers = require('./routes/users');
-const routeCards = require('./routes/cards');
-
-const NotFoundError = require('./codes/errors/NotFoundError');
-const errorHandler = require('./middlewares/errorHandler');
-
-const { PORT = 3000, URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
-
-mongoose
-  .connect(URL)
-  .then(() => {
-    console.log('Запуск');
-  })
-  .catch(() => {
-    console.log('Запуска не будет');
-  });
+const {
+  PORT = 3000,
+  BASE_PATH,
+} = process.env;
 
 const app = express();
 
+mongoose.connect('mongodb://127.0.0.1/mestodb');
+
+/* метод use позволяет использовать middleware */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet());
+app.use(cors);
 
-app.use('/', routeSignup);
-app.use('/', routeSignin);
+app.use(requestLogger); // подключаем логгер запросов до роутов
 
-app.use(auth);
+app.post('/signin', celebrate(validateLogin), login);
+app.post('/signup', celebrate(validateUser), createUser);
 
-app.use('/users', routeUsers);
-app.use('/cards', routeCards);
+// авторизация
+app.use('/users', auth, require('./routes/users'));
 
-app.use((req, res, next) => next(new NotFoundError('Не найдено')));
-app.use(errors());
-app.use(errorHandler);
+app.use('/cards', auth, require('./routes/cards'));
 
-app.listen(PORT);
+app.use(router);
+app.use('*', (req, res, next) => {
+  next(new myError.NotFoundError(myError.NotFoundMsg));
+}); // несуществующий роут всегда должен быть после остальных роутов в конце
+
+app.use(errorLogger); // подключаем логгер ошибок после роутов, до ошибок
+
+app.use(errors()); // обработчик ошибок celebrate
+app.use(defaultError); // централизованный обработчик ошибок
+
+/* прослушивание порта из первого параметра и колбэк, который выполнится при запуске приложения */
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+  console.log(`Ссылка на сервер ${BASE_PATH}`);
+});

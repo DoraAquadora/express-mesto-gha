@@ -1,43 +1,38 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
-const { URL_REGEX } = require('../utils/constants');
-
-const cardSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      validate: {
-        validator: ({ length }) => length >= 2 && length <= 30,
-        message: 'нужно от 2 до 30 символов',
-      },
+const cardSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Поле "Название" должно быть заполнено'],
+    minlength: [2, 'Минимальная длина поля "name" - 2'],
+    maxlength: [30, 'Максимальная длина поля "name" - 30'],
+  },
+  link: {
+    type: String,
+    validate: {
+      validator: (v) => validator.isURL(v),
     },
-    link: {
-      type: String,
-      required: true,
-      validate: {
-        validator: (url) => URL_REGEX.test(url),
-        message: 'Нужен  URL',
-      },
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
-      required: true,
-    },
-    likes: [{
+    required: [true, 'Поле "Ссылка" должно быть заполнено'],
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+  },
+  likes: [
+    {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
       default: [],
-    }],
-    createdAt: {
-      type: Date,
-      default: Date.now,
     },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
-  {
-    versionKey: false,
-  },
-);
+}, {
+  versionKey: false,
+});
 
 module.exports = mongoose.model('card', cardSchema);

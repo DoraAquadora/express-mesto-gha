@@ -1,135 +1,85 @@
-const { ValidationError } = require('mongoose').Error;
-const { CastError } = require('mongoose').Error;
+/* экспортируем модель со схемой в контроллер */
 const Card = require('../models/card');
-const statusErr = require('../codes/status');
+const myError = require('../errors/errors');
 
-const ForbiddenError = require('../codes/errors/ForbiddenError');
-const NotFoundError = require('../codes/errors/NotFoundError');
-const BadRequestError = require('../codes/errors/BadRequestError');
-
-module.exports.getCards = (req, res, next) => {
-  Card
-    .find({})
+const getCards = (req, res, next) => {
+  Card.find({})
     .populate(['owner', 'likes'])
-    .then((cards) => res.send({ data: cards }))
+    .then((cards) => res.send(cards))
     .catch(next);
 };
 
-module.exports.createCard = (req, res, next) => {
-  const { name, link } = req.body;
-  const { userId } = req.user;
-
-  Card
-    .create({ name, link, owner: userId })
-    .then((card) => res.status(statusErr.Created).send({ data: card }))
+const createCard = (req, res, next) => {
+  Card.create({
+    name: req.body.name,
+    link: req.body.link,
+    owner: req.user._id, // используем req.user
+  })
+    .then((card) => {
+      res.status(201).send(card);
+    })
     .catch((err) => {
-      if (err instanceof ValidationError) {
-        next(
-          new BadRequestError(
-            'неверные данные',
-          ),
-        );
+      if (err.name === 'ValidationError') {
+        next(new myError.BadRequestError(myError.BadRequestMsg));
       } else {
         next(err);
       }
     });
 };
 
-module.exports.deleteCard = (req, res, next) => {
-  const { id: cardId } = req.params;
-  const { userId } = req.user;
+const deleteCard = (req, res, next) => {
+  const owner = req.user._id;
 
-  Card
-    .findById({
-      _id: cardId,
-    })
+  Card.findByIdAndRemove({ _id: req.params.cardId })
+    .orFail(() => new myError.NotFoundError(myError.NotFoundMsg))
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('не найдено');
+        return next(new myError.NotFoundError(myError.NotFoundMsg));
       }
-
-      const { owner: cardOwnerId } = card;
-
-      if (cardOwnerId.valueOf() !== userId) {
-        throw new ForbiddenError('без доступа');
+      if (card.owner.toHexString() !== (owner)) {
+        return next(new myError.ForbiddenError(myError.ForbiddenMsg));
       }
-
-      return Card.findByIdAndDelete(cardId);
-    })
-    .then((deletedCard) => {
-      if (!deletedCard) {
-        throw new NotFoundError('не найдено');
-      }
-
-      res.send({ data: deletedCard });
+      return res.send({ message: 'Удалено успешно' });
     })
     .catch(next);
 };
 
-module.exports.likeCard = (req, res, next) => {
-  const { cardId } = req.params;
-  const { userId } = req.user;
+const likeCard = (req, res, next) => {
+  const { _id } = req.user;
 
-  Card
-    .findByIdAndUpdate(
-      cardId,
-      {
-        $addToSet: {
-          likes: userId,
-        },
-      },
-      {
-        new: true,
-      },
-    )
+  Card.findByIdAndUpdate(
+    { _id: req.params.cardId },
+    { $addToSet: { likes: _id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  )
+    .populate(['owner', 'likes'])
+    .orFail(() => new myError.NotFoundError(myError.NotFoundMsg))
     .then((card) => {
-      if (card) return res.send({ data: card });
-
-      throw new NotFoundError('Не найдено');
+      res.send(card);
     })
-    .catch((err) => {
-      if (err instanceof CastError) {
-        next(
-          new BadRequestError(
-            'Неверные данные',
-          ),
-        );
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
-module.exports.deleteLikeCard = (req, res, next) => {
-  const { cardId } = req.params;
-  const { userId } = req.user;
+const dislikeCard = (req, res, next) => {
+  const { _id } = req.user;
 
-  Card
-    .findByIdAndUpdate(
-      cardId,
-      {
-        $pull: {
-          likes: userId,
-        },
-      },
-      {
-        new: true,
-      },
-    )
+  Card.findByIdAndUpdate(
+    { _id: req.params.cardId },
+    { $pull: { likes: _id } }, // убрать _id из массива
+    { new: true },
+  )
+    .populate(['owner', 'likes'])
+    .orFail(() => new myError.NotFoundError(myError.NotFoundMsg))
     .then((card) => {
-      if (card) return res.send({ data: card });
-
-      throw new NotFoundError('не найдено');
+      res.send(card);
     })
-    .catch((err) => {
-      if (err instanceof CastError) {
-        next(
-          new BadRequestError(
-            'Неверные данные',
-          ),
-        );
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
+};
+
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
 };
