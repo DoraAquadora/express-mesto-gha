@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const router = require('express').Router();
 const { celebrate, errors } = require('celebrate');
-
+const cors = require('cors');
 const {
   validateLogin,
   validateUser,
@@ -13,7 +13,7 @@ const {
 const auth = require('./middlewares/auth');
 const defaultError = require('./middlewares/defaultError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const cors = require('./middlewares/cors');
+// const cors = require('./middlewares/cors');
 const { login, createUser } = require('./controllers/auth');
 const myError = require('./errors/errors');
 
@@ -30,7 +30,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
-app.use(cors);
+app.use(cors({
+  origin: ['https://DoraAquadora.student.nomoredomains.xyz', 'http://DoraAquadora.student.nomoredomains.xyz', 'https://api.DoraAquadora.students.nomoredomains.xyz', 'http://api.DoraAquadora.students.nomoredomains.xyz'],
+  credentials: true,
+}));
 
 app.use(requestLogger); // подключаем логгер запросов до роутов
 
