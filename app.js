@@ -24,7 +24,7 @@ const {
 
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1/mestodb');
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 /* метод use позволяет использовать middleware */
 app.use(bodyParser.json());
